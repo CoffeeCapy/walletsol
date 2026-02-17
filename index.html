@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Hunter - Ultimate Edition</title>
+    <title>Solana Hunter - Minimalist Edition</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -17,41 +17,54 @@
         }
         
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 450px; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 80px; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 90px; box-sizing: border-box; }
         
         .page-content { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .page-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- HOME & LIST ASSETS --- */
-        .total-balance { font-size: 38px; font-weight: bold; text-align: center; margin-top: 20px; }
-        .balance-change { color: var(--primary); text-align: center; font-size: 14px; margin-bottom: 30px; }
+        /* --- HOME --- */
+        .header-home { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .total-balance { font-size: 38px; font-weight: bold; text-align: center; margin-top: 15px; }
+        .balance-change { color: #848e9c; text-align: center; font-size: 14px; margin-bottom: 25px; }
         
-        .action-row { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .action-row { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 5px; }
         .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; cursor: pointer; }
-        .action-icon { background: var(--card); width: 52px; height: 52px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 22px; }
+        .action-icon { background: var(--card); width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.05); }
         .action-icon.highlight { background: var(--primary); color: #000; }
 
         .sub-tabs { display: flex; gap: 20px; border-bottom: 1px solid rgba(128,128,128,0.1); margin-bottom: 15px; }
         .sub-tab { padding: 10px 0; color: #848e9c; cursor: pointer; font-size: 14px; font-weight: bold; }
         .sub-tab.active { color: var(--text); border-bottom: 2px solid var(--primary); }
 
-        .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(128,128,128,0.05); }
+        .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; cursor: pointer; }
         .token-meta { display: flex; align-items: center; gap: 12px; }
+        .manage-crypto-link { display: block; text-align: center; color: var(--primary); font-weight: bold; margin: 20px 0; cursor: pointer; font-size: 14px; }
 
-        /* --- SWAP UI (UTUH) --- */
-        .swap-card { background: var(--input); border-radius: 20px; padding: 18px; margin-bottom: 5px; position: relative; border: 1px solid rgba(128,128,128,0.1); }
+        /* --- SWAP --- */
+        .swap-card { background: var(--input); border-radius: 20px; padding: 18px; margin-bottom: 5px; position: relative; }
         .swap-header { display: flex; justify-content: space-between; font-size: 13px; color: #848e9c; margin-bottom: 12px; }
-        .token-select { display: flex; align-items: center; background: var(--card); padding: 8px 12px; border-radius: 50px; cursor: pointer; }
+        .token-pill { display: flex; align-items: center; background: var(--card); padding: 6px 12px; border-radius: 50px; cursor: pointer; border: 1px solid rgba(128,128,128,0.1); }
         .swap-input { background: none; border: none; color: var(--text); font-size: 26px; font-weight: bold; text-align: right; width: 50%; outline: none; }
         .chip { background: var(--accent); color: var(--primary); border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .switch-btn { background: var(--card); border: 4px solid var(--bg); width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; }
+        .switch-circle { background: var(--card); border: 4px solid var(--bg); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; }
 
-        /* --- SETTINGS UI (UTUH) --- */
+        /* --- MANAGE --- */
+        .search-box { width: 100%; background: var(--input); border: none; padding: 12px 15px; border-radius: 10px; color: white; margin: 15px 0; box-sizing: border-box; }
+        .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        
+        /* --- SETTINGS --- */
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--input); border-radius: 16px; margin-bottom: 10px; cursor: pointer; }
 
-        /* --- NAV BAR --- */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: var(--bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(128,128,128,0.1); }
+        /* Toggle */
+        .switch { position: relative; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #555; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: var(--primary); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: var(--bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(128,128,128,0.1); z-index: 100; }
         .nav-link { background: none; border: none; color: #848e9c; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
         .nav-link.active { color: var(--primary); }
     </style>
@@ -61,13 +74,12 @@
 <div class="container">
     
     <div id="home" class="page-content active">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="header-home">
             <span onclick="showPage('settings')" style="cursor:pointer">⚙️</span>
-            <b>BNB Smart Chain ▾</b>
-            <span>🔍</span>
+            <span onclick="alert('Scan Address')">🔍</span>
         </div>
-        <div class="total-balance">Rp19.693,83</div>
-        <div class="balance-change">↑ Rp263,58 (+1,36%)</div>
+        <div class="total-balance" id="displayBalance">Rp0</div>
+        <div class="balance-change">Selesaikan setup dompet Anda</div>
 
         <div class="action-row">
             <div class="action-btn"><div class="action-icon">↗</div><span style="font-size:11px">Send</span></div>
@@ -79,7 +91,6 @@
 
         <div class="sub-tabs">
             <div class="sub-tab active">Crypto</div>
-            <div class="sub-tab">Watchlist</div>
             <div class="sub-tab">NFTs</div>
         </div>
 
@@ -87,18 +98,19 @@
             <div class="token-row" onclick="showPage('swap')">
                 <div class="token-meta">
                     <img src="https://cryptologos.cc/logos/solana-sol-logo.png" width="35">
-                    <div><b>SOL</b><br><small style="color:#848e9c">Solana Network</small></div>
+                    <div><b>SOL</b><br><small style="color:#848e9c">Solana</small></div>
                 </div>
-                <div style="text-align:right"><b>0.001463</b><br><small style="color:#848e9c">Rp15.343</small></div>
+                <div style="text-align:right"><b>0</b><br><small style="color:#848e9c">Rp0</small></div>
             </div>
-            <div class="token-row">
+            <div class="token-row" onclick="showPage('swap')">
                 <div class="token-meta">
                     <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="35">
                     <div><b>USDC</b><br><small style="color:#848e9c">USD Coin</small></div>
                 </div>
-                <div style="text-align:right"><b>0.2582</b><br><small style="color:#848e9c">Rp4.349</small></div>
+                <div style="text-align:right"><b>0</b><br><small style="color:#848e9c">Rp0</small></div>
             </div>
         </div>
+        <span class="manage-crypto-link" onclick="showPage('manage')">Manage crypto</span>
     </div>
 
     <div id="swap" class="page-content">
@@ -107,28 +119,30 @@
             <span>🕒</span>
         </div>
         <div class="swap-card">
-            <div class="swap-header"><span>From</span><span>👛 0.001463</span></div>
+            <div class="swap-header"><span>From</span><span>👛 0</span></div>
             <div style="display:flex; justify-content:space-between; align-items:center">
-                <div class="token-select">
-                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" width="20">
-                    <span style="margin-left:8px; font-weight:bold">SOL</span>
+                <div class="token-pill">
+                    <img id="from-img" src="https://cryptologos.cc/logos/solana-sol-logo.png" width="20">
+                    <span id="from-sym" style="margin-left:8px; font-weight:bold">SOL</span>
+                    <span style="margin-left:5px; font-size:10px">❯</span>
                 </div>
                 <input type="number" class="swap-input" placeholder="0">
             </div>
             <div style="display:flex; justify-content:space-between; margin-top:15px">
-                <small style="color:#848e9c">Solana Network</small>
-                <div style="display:flex; gap:5px">
+                <small style="color:#848e9c">Balance: 0</small>
+                <div style="display:flex; gap:6px">
                     <button class="chip">25%</button><button class="chip">50%</button><button class="chip">Max</button>
                 </div>
             </div>
         </div>
-        <div class="switch-btn">⇅</div>
+        <div class="switch-circle" onclick="swapToggle()">⇅</div>
         <div class="swap-card" style="margin-top:0">
             <div class="swap-header"><span>To</span><span>Balance: 0</span></div>
             <div style="display:flex; justify-content:space-between; align-items:center">
-                <div class="token-select">
-                    <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="20">
-                    <span style="margin-left:8px; font-weight:bold">USDC</span>
+                <div class="token-pill">
+                    <img id="to-img" src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="20">
+                    <span id="to-sym" style="margin-left:8px; font-weight:bold">USDC</span>
+                    <span style="margin-left:5px; font-size:10px">❯</span>
                 </div>
                 <input type="number" class="swap-input" placeholder="0" readonly>
             </div>
@@ -136,25 +150,45 @@
         <button style="background:var(--primary); color:#000; width:100%; padding:18px; border-radius:50px; border:none; font-weight:bold; margin-top:30px; font-size:16px;">Continue</button>
     </div>
 
+    <div id="manage" class="page-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span onclick="showPage('home')" style="cursor:pointer">←</span>
+            <b>Manage crypto</b>
+            <span>+</span>
+        </div>
+        <input type="text" class="search-box" placeholder="Search or paste Smart Contract...">
+        <div class="manage-item">
+            <div class="token-meta"><img src="https://cryptologos.cc/logos/solana-sol-logo.png" width="30"><div><b>SOL</b><br><small>Solana</small></div></div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+        <div class="manage-item">
+            <div class="token-meta"><img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" width="30"><div><b>BTC</b><br><small>Bitcoin</small></div></div>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+        <div class="manage-item">
+            <div class="token-meta"><img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" width="30"><div><b>ETH</b><br><small>Ethereum</small></div></div>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+    </div>
+
     <div id="settings" class="page-content">
         <h3>Settings</h3>
-        <div class="setting-item" onclick="toggleDark()">
-            <span>🌙 Dark Mode</span>
-            <span id="modeLabel">ON</span>
+        <div class="setting-item">
+            <div style="display:flex; align-items:center; gap:12px">🌙 <span>Dark Mode</span></div>
+            <label class="switch"><input type="checkbox" id="darkToggle" checked onchange="toggleDark()"><span class="slider"></span></label>
         </div>
-        <div class="setting-item"><span>📷 Scan QR Code</span><span>❯</span></div>
-        <div class="setting-item"><span>🔗 Wallet Connect</span><span>❯</span></div>
-        <button onclick="showPage('home')" style="background:none; border:1px solid #555; color:var(--text); padding:10px 20px; border-radius:10px; margin-top:20px">Back to Home</button>
+        <div class="setting-item"><span>📷 Scan QR</span><span>❯</span></div>
+        <div class="setting-item" style="margin-top:20px; color:var(--danger)" onclick="resetWallet()"><span>🗑️ Reset Wallet</span></div>
+        <button onclick="showPage('home')" style="background:none; border:1px solid #555; color:var(--text); padding:10px 20px; border-radius:10px; margin-top:20px; width:100%">Back</button>
     </div>
 
     <nav class="nav-bar">
-        <button class="nav-link active" onclick="showPage('home')">🏠<br>Home</button>
-        <button class="nav-link">📈<br>Trending</button>
-        <button class="nav-link" onclick="showPage('swap')">🔄<br>Trade</button>
-        <button class="nav-link">🌱<br>Earn</button>
-        <button class="nav-link">🧭<br>Discover</button>
+        <button class="nav-link active" id="btn-home" onclick="showPage('home')">🏠<br>Home</button>
+        <button class="nav-link" id="btn-trending">📈<br>Trending</button>
+        <button class="nav-link" id="btn-swap" onclick="showPage('swap')">🔄<br>Trade</button>
+        <button class="nav-link" id="btn-earn">🌱<br>Earn</button>
+        <button class="nav-link" id="btn-discover">🧭<br>Discover</button>
     </nav>
-
 </div>
 
 <script>
@@ -162,14 +196,25 @@
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        const btn = document.getElementById('btn-' + id);
+        if(btn) btn.classList.add('active');
     }
 
     function toggleDark() {
-        const body = document.getElementById('appBody');
-        body.classList.toggle('light-mode');
-        document.getElementById('modeLabel').innerText = body.classList.contains('light-mode') ? 'OFF' : 'ON';
+        const isDark = document.getElementById('darkToggle').checked;
+        document.getElementById('appBody').className = isDark ? '' : 'light-mode';
+    }
+
+    function swapToggle() {
+        const f = document.getElementById('from-sym').innerText;
+        const t = document.getElementById('to-sym').innerText;
+        document.getElementById('from-sym').innerText = t;
+        document.getElementById('to-sym').innerText = f;
+    }
+
+    function resetWallet() {
+        if(confirm("Hapus data?")) { localStorage.clear(); location.reload(); }
     }
 </script>
-
 </body>
 </html>
