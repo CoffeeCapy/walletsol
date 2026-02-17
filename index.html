@@ -3,68 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Super Wallet - Tablet Pro</title>
+    <title>Solana Pro Wallet + History</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
     <style>
-        :root {
-            --bg: #0b0e11;
-            --card: #1e2329;
-            --primary: #02c076;
-            --text: #eaeaea;
-            --accent: #474d57;
-        }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0;
-        }
-        .container {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-            width: 90%;
-            max-width: 380px;
-            text-align: center;
-            border: 1px solid #333;
-        }
+        :root { --bg: #0b0e11; --card: #1e2329; --primary: #02c076; --text: #eaeaea; --accent: #474d57; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { background: var(--card); padding: 25px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; }
         .logo { width: 45px; margin-bottom: 10px; }
         .balance-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
         .fiat-val { color: var(--primary); font-size: 16px; margin-bottom: 20px; }
+        #qrcode { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 20px; }
+        .address-box { background: #0b0e11; padding: 12px; border-radius: 10px; font-size: 10px; word-break: break-all; color: #b7bdc6; margin-bottom: 20px; border: 1px solid var(--accent); cursor: pointer; }
+        button { background: var(--primary); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         
-        /* Gaya QR Code */
-        #qrcode { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 12px; 
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .address-box {
-            background: #0b0e11;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 10px;
-            word-break: break-all;
-            color: #b7bdc6;
-            margin-bottom: 20px;
-            border: 1px solid var(--accent);
-            cursor: pointer;
-        }
-        button {
-            background: var(--primary);
-            color: #000; border: none; padding: 15px;
-            border-radius: 12px; font-weight: bold;
-            width: 100%; font-size: 16px; cursor: pointer;
-            margin-bottom: 10px;
-        }
-        .btn-reset { background: #333; color: #ff4d4d; font-size: 12px; padding: 8px; }
-        .footer { font-size: 10px; color: #848e9c; margin-top: 20px; }
+        /* Style Riwayat */
+        .history-section { text-align: left; margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
+        .history-item { background: #161a1e; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+        .status-success { color: var(--primary); font-weight: bold; }
+        .btn-reset { background: transparent; color: #ff4d4d; border: 1px solid #444; font-size: 12px; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -78,19 +35,41 @@
     <div id="qrcode"></div>
 
     <div style="color: #848e9c; font-size: 12px; text-align: left; margin-bottom: 5px;">Alamat (Tap untuk Salin):</div>
-    <div class="address-box" id="addressDisplay" onclick="copyAddr()">Klik tombol di bawah</div>
+    <div class="address-box" id="addressDisplay" onclick="copyAddr()">CZnC1a...8CVy</div>
     
     <button onclick="buatWalletBaru()">Buat Wallet Baru</button>
-    <button class="btn-reset" onclick="hapusWallet()">Hapus & Reset Data</button>
-    
-    <div class="footer">
-        Solana Devnet Mode <br>
-        Kunci tersimpan aman di LocalStorage tablet Anda.
+
+    <div class="history-section">
+        <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px;">Riwayat Aktivitas</div>
+        <div id="historyList">
+            </div>
     </div>
+
+    <button class="btn-reset" onclick="hapusWallet()">Hapus & Reset Data</button>
+    <div style="font-size: 10px; color: #848e9c; margin-top: 15px;">Solana Devnet Mode</div>
 </div>
 
 <script>
-    // 1. Simpan & Ambil Data dari Memory Tablet
+    function simpanKeHistory(pesan) {
+        let history = JSON.parse(localStorage.getItem("wallet_history") || "[]");
+        const waktu = new Date().toLocaleTimeString();
+        history.unshift({ pesan, waktu });
+        if(history.length > 5) history.pop(); // Simpan 5 terakhir saja
+        localStorage.setItem("wallet_history", JSON.stringify(history));
+        tampilkanHistory();
+    }
+
+    function tampilkanHistory() {
+        const list = document.getElementById("historyList");
+        const history = JSON.parse(localStorage.getItem("wallet_history") || "[]");
+        list.innerHTML = history.map(item => `
+            <div class="history-item">
+                <span>${item.pesan}</span>
+                <span class="status-success">${item.waktu}</span>
+            </div>
+        `).join('') || '<div style="color:#474d57; font-size:11px;">Belum ada aktivitas</div>';
+    }
+
     function simpanWallet(kp) {
         const secret = JSON.stringify(Array.from(kp.secretKey));
         localStorage.setItem("solana_pro_key", secret);
@@ -105,20 +84,12 @@
         return null;
     }
 
-    // 2. Update QR Code
     function updateQR(addr) {
         const container = document.getElementById("qrcode");
         container.innerHTML = ""; 
-        new QRCode(container, {
-            text: addr,
-            width: 120,
-            height: 120,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-        });
+        new QRCode(container, { text: addr, width: 120, height: 120 });
     }
 
-    // 3. Ambil Harga SOL Real-time
     async function getHarga() {
         try {
             const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=idr');
@@ -127,12 +98,12 @@
         } catch (e) { document.getElementById('priceDisplay').innerText = "Harga Offline"; }
     }
 
-    // 4. Fungsi Tombol
     function buatWalletBaru() {
-        if(confirm("Buat wallet baru? Data lama akan tertimpa.")) {
+        if(confirm("Buat wallet baru?")) {
             const kp = solanaWeb3.Keypair.generate();
             simpanWallet(kp);
             tampilkan(kp);
+            simpanKeHistory("Wallet Baru Dibuat");
         }
     }
 
@@ -143,7 +114,7 @@
     }
 
     function hapusWallet() {
-        if(confirm("Hapus wallet permanen?")) {
+        if(confirm("Hapus semua data?")) {
             localStorage.clear();
             location.reload();
         }
@@ -151,18 +122,17 @@
 
     function copyAddr() {
         const text = document.getElementById('addressDisplay').innerText;
-        if(text.includes("Klik")) return;
         navigator.clipboard.writeText(text);
-        alert("Alamat disalin ke clipboard!");
+        alert("Alamat disalin!");
+        simpanKeHistory("Alamat Disalin");
     }
 
-    // Jalankan saat startup
     window.onload = () => {
         getHarga();
+        tampilkanHistory();
         const lama = muatWallet();
         if(lama) tampilkan(lama);
     };
 </script>
-
 </body>
 </html>
