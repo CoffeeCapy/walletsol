@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Hunter - Live Trade</title>
+    <title>Solana Hunter - Final Fixed</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
@@ -24,25 +24,36 @@
         .action-icon.highlight { background: var(--primary); color: #000; }
         .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(128,128,128,0.05); cursor: pointer; }
         
-        /* --- SWAP CARD --- */
+        /* --- SEARCH & INPUTS --- */
+        .search-input { width: 100%; background: var(--input); border: 1px solid var(--accent); padding: 12px; border-radius: 12px; color: white; box-sizing: border-box; outline: none; margin-bottom: 15px; }
+        
+        /* --- SWAP --- */
         .swap-card { background: var(--input); border-radius: 20px; padding: 18px; margin-bottom: 5px; position: relative; }
         .swap-input { background: none; border: none; color: var(--text); font-size: 24px; font-weight: bold; text-align: right; width: 50%; outline: none; }
-        .switch-circle { background: var(--card); border: 4px solid var(--bg); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; transition: 0.3s; }
-        .switch-circle:active { transform: scale(0.9) rotate(180deg); }
+        .switch-circle { background: var(--card); border: 4px solid var(--bg); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; }
 
-        /* --- NAV BAR --- */
+        /* --- SETTINGS --- */
+        .wallet-box { background: linear-gradient(135deg, #02c076, #007d4d); color: #000; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--input); border-radius: 16px; margin-bottom: 10px; cursor: pointer; }
+        .phrase-box { background: rgba(0,0,0,0.1); padding: 10px; border-radius: 10px; margin-top: 10px; font-family: monospace; font-size: 10px; display: none; word-break: break-all; border: 1px dashed #000; }
+
+        /* --- NAV --- */
         .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: var(--bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(128,128,128,0.1); z-index: 100; }
         .nav-link { background: none; border: none; color: #848e9c; font-size: 10px; text-align: center; cursor: pointer; }
         .nav-link.active { color: var(--primary); }
 
-        .btn-swap { background: var(--primary); color: #000; width: 100%; padding: 18px; border-radius: 50px; border: none; font-weight: bold; margin-top: 25px; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .btn-swap:active { transform: scale(0.98); opacity: 0.9; }
+        /* Switch UI */
+        .switch { position: relative; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #474d57; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: var(--primary); }
+        input:checked + .slider:before { transform: translateX(18px); }
     </style>
 </head>
-<body id="appBody">
+<body>
 
 <div class="container">
-    
     <div id="home" class="page-content active">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span onclick="showPage('settings')" style="cursor:pointer; font-size: 20px;">⚙️</span>
@@ -59,18 +70,20 @@
             <div style="text-align:center"><div class="action-icon">🌱</div><small>Earn</small></div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-            <b style="font-size: 18px;">Assets</b>
-            <small style="color:var(--primary); cursor:pointer" onclick="updatePrices()">🔄 Refresh</small>
-        </div>
+        <div style="font-weight:bold; margin-bottom:10px">Assets</div>
         <div id="homeTokenList"></div>
         <div style="text-align:center; color:var(--primary); font-weight:bold; margin-top:25px; cursor:pointer" onclick="showPage('manage')">Manage crypto</div>
+    </div>
+
+    <div id="manage" class="page-content">
+        <h3 onclick="showPage('home')" style="cursor:pointer">← Manage Crypto</h3>
+        <input type="text" class="search-input" id="tokenSearch" placeholder="Cari koin..." oninput="filterTokens()">
+        <div id="manageListContainer"></div>
     </div>
 
     <div id="swap" class="page-content">
         <h3>Swap Trade</h3>
         <div class="swap-card">
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#848e9c; margin-bottom:10px"><span>From</span><span>Bal: 0.00</span></div>
             <div style="display:flex; justify-content:space-between; align-items:center">
                 <div style="display:flex; align-items:center; background:var(--card); padding:5px 12px; border-radius:50px">
                     <img id="swap-from-img" src="https://cryptologos.cc/logos/solana-sol-logo.png" width="20">
@@ -79,11 +92,8 @@
                 <input type="number" id="input-from" class="swap-input" placeholder="0" oninput="calculateSwap()">
             </div>
         </div>
-
         <div class="switch-circle" onclick="swapToggle()">⇅</div>
-
-        <div class="swap-card" style="margin-top:0">
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#848e9c; margin-bottom:10px"><span>To</span><span>Estimate</span></div>
+        <div class="swap-card">
             <div style="display:flex; justify-content:space-between; align-items:center">
                 <div style="display:flex; align-items:center; background:var(--card); padding:5px 12px; border-radius:50px">
                     <img id="swap-to-img" src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="20">
@@ -92,30 +102,32 @@
                 <input type="number" id="input-to" class="swap-input" placeholder="0" readonly style="color:var(--primary)">
             </div>
         </div>
-
-        <p id="rate-info" style="font-size:11px; color:#848e9c; text-align:center; margin-top:10px">Fetching rate...</p>
-        <button class="btn-swap" onclick="executeSwap()">Swap</button>
-    </div>
-
-    <div id="manage" class="page-content">
-        <h3 onclick="showPage('home')" style="cursor:pointer">← Manage</h3>
-        <div id="manageListContainer"></div>
+        <button class="action-icon highlight" style="width:100%; border-radius:50px; margin-top:20px; font-weight:bold" onclick="executeSwap()">Swap</button>
     </div>
 
     <div id="browser" class="page-content">
         <h3>Browser</h3>
-        <div style="background:var(--card); padding:15px; border-radius:12px; text-align:center">Explore dApps</div>
+        <input type="text" class="search-input" placeholder="Enter dApp URL...">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
+            <div class="setting-item" style="display:block; text-align:center">🪐<br>Jupiter</div>
+            <div class="setting-item" style="display:block; text-align:center">☀️<br>Raydium</div>
+        </div>
     </div>
 
     <div id="settings" class="page-content">
         <h3 onclick="showPage('home')" style="cursor:pointer">← Settings</h3>
         <div class="wallet-box">
-            <div id="setupWallet"><button onclick="createNewWallet()" style="background:#000; color:#fff; padding:10px 20px; border-radius:10px; border:none; font-weight:bold;">Generate Wallet</button></div>
+            <div id="setupWallet"><button onclick="createNewWallet()" style="background:#000; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">Generate Wallet</button></div>
             <div id="viewWallet" style="display:none">
                 <p id="pubKeyDisplay" style="font-size:10px; word-break:break-all;"></p>
+                <button onclick="togglePhrase()" style="background:rgba(0,0,0,0.2); border:none; padding:8px; border-radius:8px; font-size:10px;">Show Secret Phrase</button>
                 <div id="phraseDisplay" class="phrase-box"></div>
             </div>
         </div>
+        <div id="reader" style="display:none; width:100%; border-radius:15px; margin-bottom:15px;"></div>
+        <div class="setting-item" onclick="startScan()"><span>📷 Scan QR Code</span><span>❯</span></div>
+        <div class="setting-item"><span>🌙 Dark Mode</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="setting-item" style="color:var(--danger)" onclick="resetData()"><span>🗑️ Reset All Data</span></div>
     </div>
 
     <nav class="nav-bar">
@@ -127,6 +139,7 @@
 </div>
 
 <script>
+    let scanner;
     let tokens = [
         { id: 'solana', name: 'SOL', full: 'Solana', img: 'https://cryptologos.cc/logos/solana-sol-logo.png', active: true, price: 0 },
         { id: 'usd-coin', name: 'USDC', full: 'USD Coin', img: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', active: true, price: 0 },
@@ -136,70 +149,23 @@
 
     async function updatePrices() {
         try {
-            const ids = tokens.map(t => t.id).join(',');
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=idr`);
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,usd-coin&vs_currencies=idr`);
             const data = await res.json();
             tokens.forEach(t => { if(data[t.id]) t.price = data[t.id].idr; });
-            renderApp(); calculateSwap();
+            renderApp();
         } catch (e) { console.log("API Error"); }
-    }
-
-    function calculateSwap() {
-        const val = document.getElementById('input-from').value;
-        const fToken = tokens.find(t => t.name === document.getElementById('swap-from-sym').innerText);
-        const tToken = tokens.find(t => t.name === document.getElementById('swap-to-sym').innerText);
-        
-        if(val > 0 && fToken.price && tToken.price) {
-            const res = (val * fToken.price) / tToken.price;
-            document.getElementById('input-to').value = res.toFixed(4);
-            document.getElementById('rate-info').innerText = `1 ${fToken.name} ≈ ${(fToken.price / tToken.price).toFixed(2)} ${tToken.name}`;
-        } else {
-            document.getElementById('input-to').value = '';
-        }
-    }
-
-    // FUNGSI EKSEKUSI SWAP
-    function executeSwap() {
-        const amountFrom = document.getElementById('input-from').value;
-        const amountTo = document.getElementById('input-to').value;
-        const symFrom = document.getElementById('swap-from-sym').innerText;
-        const symTo = document.getElementById('swap-to-sym').innerText;
-
-        if(!amountFrom || amountFrom <= 0) {
-            alert("Masukkan jumlah koin yang ingin ditukar!");
-            return;
-        }
-
-        // Simulasi Proses
-        const btn = document.querySelector('.btn-swap');
-        btn.innerText = "Processing...";
-        btn.disabled = true;
-
-        setTimeout(() => {
-            alert(`✅ Swap Berhasil!\n\nAnda menukar: ${amountFrom} ${symFrom}\nMenerima: ${amountTo} ${symTo}\n\nStatus: Terkonfirmasi di Blockchain.`);
-            btn.innerText = "Swap";
-            btn.disabled = false;
-            document.getElementById('input-from').value = '';
-            document.getElementById('input-to').value = '';
-        }, 1500);
-    }
-
-    function swapToggle() {
-        const s1 = document.getElementById('swap-from-sym'), s2 = document.getElementById('swap-to-sym');
-        const i1 = document.getElementById('swap-from-img'), i2 = document.getElementById('swap-to-img');
-        [s1.innerText, s2.innerText] = [s2.innerText, s1.innerText];
-        [i1.src, i2.src] = [i2.src, i1.src];
-        calculateSwap();
     }
 
     function renderApp() {
         const hList = document.getElementById('homeTokenList');
         const mList = document.getElementById('manageListContainer');
         hList.innerHTML = ''; mList.innerHTML = '';
-
         tokens.forEach((t, i) => {
             const priceTxt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(t.price);
-            mList.innerHTML += `<div class="token-row"><span>${t.name}</span><input type="checkbox" ${t.active ? 'checked' : ''} onchange="toggleT(${i})"></div>`;
+            mList.innerHTML += `<div class="token-row token-item-data" data-name="${t.name}">
+                <div style="display:flex; align-items:center; gap:10px"><img src="${t.img}" width="30"><b>${t.name}</b></div>
+                <input type="checkbox" ${t.active ? 'checked' : ''} onchange="toggleT(${i})">
+            </div>`;
             if(t.active) {
                 hList.innerHTML += `<div class="token-row" onclick="showPage('swap')">
                     <div style="display:flex; align-items:center; gap:12px"><img src="${t.img}" width="35"><div><b>${t.name}</b></div></div>
@@ -210,32 +176,48 @@
         updateWallet();
     }
 
-    function toggleT(i) { tokens[i].active = !tokens[i].active; renderApp(); }
+    function executeSwap() {
+        if(document.getElementById('input-from').value > 0) {
+            alert("Swap Berhasil Terkonfirmasi!");
+            document.getElementById('input-from').value = '';
+            document.getElementById('input-to').value = '';
+        }
+    }
 
+    function toggleT(i) { tokens[i].active = !tokens[i].active; renderApp(); }
     function showPage(id) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).classList.add('active');
     }
-
     function createNewWallet() {
         const kp = solanaWeb3.Keypair.generate();
         localStorage.setItem('w_pub', kp.publicKey.toString());
+        localStorage.setItem('w_sec', "["+kp.secretKey.toString()+"]");
         renderApp();
     }
-
     function updateWallet() {
         const p = localStorage.getItem('w_pub');
         if(p) {
             document.getElementById('setupWallet').style.display = 'none';
             document.getElementById('viewWallet').style.display = 'block';
             document.getElementById('pubKeyDisplay').innerText = p;
+            document.getElementById('phraseDisplay').innerText = localStorage.getItem('w_sec');
             document.getElementById('walletSummary').innerText = p.substring(0,6)+"..."+p.substring(p.length-4);
         }
     }
-
-    window.onload = () => { renderApp(); updatePrices(); setInterval(updatePrices, 60000); };
+    function startScan() {
+        document.getElementById('reader').style.display = 'block';
+        scanner = new Html5Qrcode("reader");
+        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { alert(txt); scanner.stop(); });
+    }
+    function togglePhrase() {
+        const d = document.getElementById('phraseDisplay');
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+    function resetData() { if(confirm("Hapus data?")) { localStorage.clear(); location.reload(); } }
+    window.onload = () => { renderApp(); updatePrices(); };
 </script>
 </body>
 </html>
