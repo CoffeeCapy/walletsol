@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Hunter - Ultimate Pro</title>
+    <title>Solana Hunter - Smart Swap</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
@@ -11,43 +11,34 @@
             --bg: #0b0e11; --card: #1e2329; --primary: #02c076; --text: #eaeaea; 
             --accent: #2b3139; --input: #161a1e; --danger: #f6465d;
         }
-        .light-mode { 
-            --bg: #f7f8fa; --card: #ffffff; --text: #1e2329; 
-            --accent: #e4e6eb; --input: #f0f2f5;
-        }
         
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 450px; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 90px; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; position: relative; padding-bottom: 90px; box-sizing: border-box; }
         
         .page-content { display: none; padding: 20px; animation: fadeIn 0.2s ease; }
         .page-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- HOME (TETAP SAMA) --- */
-        .header-home { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .total-balance { font-size: 38px; font-weight: bold; text-align: center; margin-top: 15px; }
-        .balance-change { color: #848e9c; text-align: center; font-size: 14px; margin-bottom: 25px; }
-        .action-row { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 5px; }
-        .action-icon { background: var(--card); width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .action-icon.highlight { background: var(--primary); color: #000; }
-        .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(128,128,128,0.05); cursor: pointer; }
-        .token-meta { display: flex; align-items: center; gap: 12px; }
-
-        /* --- SWAP (TETAP SAMA) --- */
-        .swap-card { background: var(--input); border-radius: 20px; padding: 18px; margin-bottom: 5px; position: relative; }
+        /* --- SWAP CARD DESIGN --- */
+        .swap-card { background: var(--input); border-radius: 20px; padding: 18px; margin-bottom: 5px; position: relative; border: 1px solid rgba(255,255,255,0.02); }
         .swap-header { display: flex; justify-content: space-between; font-size: 13px; color: #848e9c; margin-bottom: 12px; }
         .token-pill { display: flex; align-items: center; background: var(--card); padding: 6px 12px; border-radius: 50px; cursor: pointer; border: 1px solid rgba(128,128,128,0.1); }
-        .swap-input { background: none; border: none; color: var(--text); font-size: 26px; font-weight: bold; text-align: right; width: 50%; outline: none; }
-        .switch-circle { background: var(--card); border: 4px solid var(--bg); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; }
+        .swap-input { background: none; border: none; color: var(--text); font-size: 26px; font-weight: bold; text-align: right; width: 55%; outline: none; }
+        .switch-circle { background: var(--card); border: 4px solid var(--bg); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; transition: 0.3s; }
+        .switch-circle:hover { transform: rotate(180deg); color: var(--primary); }
 
-        /* --- SETTINGS (DENGAN LOGIKA PHRASE) --- */
-        .wallet-box { background: linear-gradient(135deg, #02c076, #007d4d); color: #000; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center; }
-        .phrase-display { background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; margin-top: 10px; font-family: monospace; font-size: 11px; display: none; word-break: break-all; border: 1px dashed #000; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--input); border-radius: 16px; margin-bottom: 10px; cursor: pointer; }
+        /* --- SWAP DETAILS --- */
+        .swap-details { background: rgba(255,255,255,0.02); border-radius: 15px; padding: 15px; margin-top: 15px; font-size: 12px; color: #848e9c; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
 
-        /* --- NAV BAR --- */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: var(--bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(128,128,128,0.1); z-index: 100; }
-        .nav-link { background: none; border: none; color: #848e9c; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        /* --- COMMON UI --- */
+        .total-balance { font-size: 38px; font-weight: bold; text-align: center; margin-top: 15px; }
+        .action-row { display: flex; justify-content: space-between; margin: 20px 0; gap: 5px; }
+        .action-icon { background: var(--card); width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+        .action-icon.highlight { background: var(--primary); color: #000; }
+        .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(128,128,128,0.05); cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: var(--bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(128,128,128,0.1); }
+        .nav-link { background: none; border: none; color: #848e9c; font-size: 10px; text-align: center; cursor: pointer; }
         .nav-link.active { color: var(--primary); }
     </style>
 </head>
@@ -56,153 +47,197 @@
 <div class="container">
     
     <div id="home" class="page-content active">
-        <div class="header-home">
-            <span onclick="showPage('settings')" style="cursor:pointer">⚙️</span>
-            <span onclick="startScan()">🔍</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span onclick="showPage('settings')" style="cursor:pointer; font-size: 20px;">⚙️</span>
+            <span onclick="startScan()" style="cursor:pointer; font-size: 20px;">🔍</span>
         </div>
         <div class="total-balance">Rp0</div>
-        <div class="balance-change" id="walletSummary">No wallet active</div>
+        <div style="color: #848e9c; text-align: center; font-size: 14px; margin-bottom: 25px;" id="walletSummary">No wallet active</div>
 
-        <div class="action-row" style="margin-top:20px">
-            <div class="action-btn"><div class="action-icon">↗</div><span style="font-size:11px">Send</span></div>
-            <div class="action-btn"><div class="action-icon">＋</div><span style="font-size:11px">Fund</span></div>
-            <div class="action-btn" onclick="showPage('swap')"><div class="action-icon highlight">⇆</div><span style="font-size:11px">Swap</span></div>
-            <div class="action-btn"><div class="action-icon">🏛</div><span style="font-size:11px">Sell</span></div>
-            <div class="action-btn"><div class="action-icon">🌱</div><span style="font-size:11px">Earn</span></div>
+        <div class="action-row">
+            <div class="action-btn" style="text-align:center"><div class="action-icon">↗</div><small>Send</small></div>
+            <div class="action-btn" style="text-align:center"><div class="action-icon">＋</div><small>Fund</small></div>
+            <div class="action-btn" onclick="showPage('swap')" style="text-align:center"><div class="action-icon highlight">⇆</div><small>Swap</small></div>
+            <div class="action-btn" style="text-align:center"><div class="action-icon">🏛</div><small>Sell</small></div>
+            <div class="action-btn" style="text-align:center"><div class="action-icon">🌱</div><small>Earn</small></div>
         </div>
 
-        <div id="homeTokenList">
-            </div>
+        <div id="homeTokenList"></div>
+        <div style="text-align: center; color: var(--primary); font-weight: bold; margin-top: 20px; cursor: pointer;" onclick="showPage('manage')">Manage crypto</div>
     </div>
 
     <div id="swap" class="page-content">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
             <h3 style="margin:0">Swap</h3>
-            <span>🕒</span>
+            <span style="cursor:pointer" onclick="alert('Slippage: 0.5%')">⚙️</span>
         </div>
+
         <div class="swap-card">
-            <div class="swap-header"><span>From</span><span>👛 0</span></div>
+            <div class="swap-header"><span>From</span><span>👛 Bal: <span id="from-bal">0.00</span></span></div>
             <div style="display:flex; justify-content:space-between; align-items:center">
-                <div class="token-pill">
-                    <img id="from-img" src="https://cryptologos.cc/logos/solana-sol-logo.png" width="20">
-                    <span id="from-sym" style="margin-left:8px; font-weight:bold">SOL</span>
-                    <span style="margin-left:5px; font-size:10px">❯</span>
+                <div class="token-pill" onclick="alert('Select Token')">
+                    <img id="swap-from-img" src="https://cryptologos.cc/logos/solana-sol-logo.png" width="22">
+                    <span id="swap-from-sym" style="margin-left:8px; font-weight:bold">SOL</span>
                 </div>
-                <input type="number" class="swap-input" placeholder="0">
+                <input type="number" id="input-from" class="swap-input" placeholder="0" oninput="calculateSwap()">
             </div>
         </div>
+
         <div class="switch-circle" onclick="swapToggle()">⇅</div>
+
         <div class="swap-card" style="margin-top:0">
-            <div class="swap-header"><span>To</span><span>Balance: 0</span></div>
+            <div class="swap-header"><span>To (Estimate)</span><span>Bal: 0.00</span></div>
             <div style="display:flex; justify-content:space-between; align-items:center">
-                <div class="token-pill">
-                    <img id="to-img" src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="20">
-                    <span id="to-sym" style="margin-left:8px; font-weight:bold">USDC</span>
-                    <span style="margin-left:5px; font-size:10px">❯</span>
+                <div class="token-pill" onclick="alert('Select Token')">
+                    <img id="swap-to-img" src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="22">
+                    <span id="swap-to-sym" style="margin-left:8px; font-weight:bold">USDC</span>
                 </div>
-                <input type="number" class="swap-input" placeholder="0" readonly>
+                <input type="number" id="input-to" class="swap-input" placeholder="0" readonly style="color: var(--primary); opacity: 0.8;">
             </div>
         </div>
-        <button style="background:var(--primary); color:#000; width:100%; padding:18px; border-radius:50px; border:none; font-weight:bold; margin-top:30px; font-size:16px;">Continue</button>
+
+        <div class="swap-details">
+            <div class="detail-row"><span>Exchange Rate</span><span id="swap-rate">1 SOL ≈ 150.2 USDC</span></div>
+            <div class="detail-row"><span>Slippage Tolerance</span><span>0.5%</span></div>
+            <div class="detail-row"><span>Transaction Fee</span><span style="color: var(--primary)">$0.0001 (Solana)</span></div>
+        </div>
+
+        <button id="swap-btn" style="background:var(--primary); color:#000; width:100%; padding:18px; border-radius:50px; border:none; font-weight:bold; margin-top:25px; font-size:16px; cursor:pointer;" onclick="processSwap()">Review Swap</button>
+    </div>
+
+    <div id="manage" class="page-content">
+        <h3>Manage Crypto</h3>
+        <div id="manageListContainer"></div>
+        <button onclick="showPage('home')" style="width:100%; margin-top:20px; background:none; color:var(--text); border:1px solid #555; padding:10px; border-radius:10px;">Back</button>
+    </div>
+
+    <div id="browser" class="page-content">
+        <h3>Browser</h3>
+        <input type="text" style="width:100%; background:var(--input); border:none; padding:15px; border-radius:50px; color:white; margin-bottom:20px;" placeholder="Search dApps...">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px;">
+            <div style="text-align:center"><div style="background:var(--card); height:60px; border-radius:15px; display:flex; justify-content:center; align-items:center; font-size:30px">🪐</div><small>Jupiter</small></div>
+            <div style="text-align:center"><div style="background:var(--card); height:60px; border-radius:15px; display:flex; justify-content:center; align-items:center; font-size:30px">🦄</div><small>Uniswap</small></div>
+            <div style="text-align:center"><div style="background:var(--card); height:60px; border-radius:15px; display:flex; justify-content:center; align-items:center; font-size:30px">🥞</div><small>Pancake</small></div>
+        </div>
     </div>
 
     <div id="settings" class="page-content">
-        <h3 style="margin-bottom:20px">Settings</h3>
-        
-        <div class="wallet-box" id="walletArea">
-            <div id="setupWallet">
-                <h4 style="margin:0">New User?</h4>
-                <button onclick="createNewWallet()" style="background:#000; color:#fff; border:none; padding:10px 20px; border-radius:10px; margin-top:10px; font-weight:bold; cursor:pointer">Create New Wallet</button>
-            </div>
-            <div id="viewWallet" style="display:none">
-                <h4 style="margin:0">Wallet Active</h4>
-                <p id="pubKeyDisplay" style="font-size:10px; word-break:break-all;"></p>
-                <button onclick="togglePhrase()" style="background:rgba(0,0,0,0.2); border:none; padding:8px; border-radius:8px; font-size:10px; cursor:pointer">Show Secret Recovery Key</button>
-                <div id="phraseDisplay" class="phrase-display"></div>
+        <h3 onclick="showPage('home')" style="cursor:pointer">← Settings</h3>
+        <div style="background: var(--input); padding: 20px; border-radius: 20px; text-align:center;">
+            <div id="walletInfo">
+                <button onclick="createNewWallet()" style="background:var(--primary); border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">Create New Wallet</button>
             </div>
         </div>
-
-        <div id="reader" style="display:none; width:100%; border-radius:15px; overflow:hidden; margin-bottom:15px;"></div>
-
-        <div class="setting-item" onclick="startScan()">
-            <span>📷 Scan QR Code</span><span>❯</span>
-        </div>
-        <div class="setting-item">
-            <span>🌙 Dark Mode</span>
-            <label class="switch"><input type="checkbox" id="darkToggle" checked onchange="toggleDark()"><span class="slider"></span></label>
-        </div>
-        <div class="setting-item" style="color:var(--danger)" onclick="resetData()"><span>🗑️ Reset Data</span></div>
-        <button onclick="showPage('home')" style="width:100%; background:none; border:1px solid #555; color:var(--text); padding:12px; border-radius:12px; margin-top:10px">Back</button>
+        <div style="margin-top: 20px;" class="setting-item" onclick="alert('Coming soon')">🔐 Security Center</div>
+        <div class="setting-item" onclick="resetData()" style="color:var(--danger)">🗑️ Delete Data</div>
     </div>
 
     <nav class="nav-bar">
-        <button class="nav-link active" onclick="showPage('home')">🏠<br>Home</button>
-        <button class="nav-link">📈<br>Market</button>
-        <button class="nav-link" onclick="showPage('swap')">🔄<br>Trade</button>
-        <button class="nav-link" onclick="showPage('settings')">⚙️<br>Settings</button>
+        <button class="nav-link active" id="nav-home" onclick="showPage('home')">🏠<br>Home</button>
+        <button class="nav-link" id="nav-swap" onclick="showPage('swap')">🔄<br>Trade</button>
+        <button class="nav-link" id="nav-manage" onclick="showPage('manage')">🛡️<br>Manage</button>
+        <button class="nav-link" id="nav-browser" onclick="showPage('browser')">🧭<br>Browser</button>
     </nav>
 </div>
 
 <script>
-    let scanner;
+    const tokens = [
+        { id: 'sol', name: 'SOL', full: 'Solana', img: 'https://cryptologos.cc/logos/solana-sol-logo.png', active: true, price: 150.2 },
+        { id: 'usdc', name: 'USDC', full: 'USD Coin', img: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', active: true, price: 1.0 },
+        { id: 'btc', name: 'BTC', full: 'Bitcoin', img: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', active: false, price: 65000.5 },
+        { id: 'eth', name: 'ETH', full: 'Ethereum', img: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', active: false, price: 3500.1 }
+    ];
 
-    function createNewWallet() {
-        const keypair = solanaWeb3.Keypair.generate();
-        const pub = keypair.publicKey.toString();
-        const secret = "[" + keypair.secretKey.toString() + "]";
-        localStorage.setItem('wallet_pub', pub);
-        localStorage.setItem('wallet_secret', secret);
-        updateUI();
-        alert("Wallet created successfully!");
+    function renderApp() {
+        const hList = document.getElementById('homeTokenList');
+        const mList = document.getElementById('manageListContainer');
+        hList.innerHTML = ''; mList.innerHTML = '';
+
+        tokens.forEach((t, i) => {
+            mList.innerHTML += `<div class="token-row" style="padding:10px 0">
+                <div style="display:flex; align-items:center; gap:10px"><img src="${t.img}" width="30"><b>${t.name}</b></div>
+                <input type="checkbox" ${t.active ? 'checked' : ''} onchange="toggleT(${i})">
+            </div>`;
+            if(t.active) {
+                hList.innerHTML += `<div class="token-row" onclick="showPage('swap')">
+                    <div style="display:flex; align-items:center; gap:12px"><img src="${t.img}" width="35"><div><b>${t.name}</b><br><small style="color:#848e9c">${t.full}</small></div></div>
+                    <div style="text-align:right"><b>0</b><br><small style="color:#848e9c">Rp0</small></div>
+                </div>`;
+            }
+        });
+        updateWallet();
     }
 
-    function updateUI() {
-        const pub = localStorage.getItem('wallet_pub');
-        if(pub) {
-            document.getElementById('setupWallet').style.display = 'none';
-            document.getElementById('viewWallet').style.display = 'block';
-            document.getElementById('pubKeyDisplay').innerText = pub;
-            document.getElementById('phraseDisplay').innerText = localStorage.getItem('wallet_secret');
-            document.getElementById('walletSummary').innerText = pub.substring(0,6) + "..." + pub.substring(pub.length-4);
+    function toggleT(i) { tokens[i].active = !tokens[i].active; renderApp(); }
+
+    // LOGIKA SMART SWAP
+    function calculateSwap() {
+        const amount = document.getElementById('input-from').value;
+        const fromSym = document.getElementById('swap-from-sym').innerText;
+        const toSym = document.getElementById('swap-to-sym').innerText;
+        
+        const fromToken = tokens.find(t => t.name === fromSym);
+        const toToken = tokens.find(t => t.name === toSym);
+
+        if (amount > 0) {
+            const result = (amount * fromToken.price) / toToken.price;
+            document.getElementById('input-to').value = result.toFixed(4);
+            document.getElementById('swap-rate').innerText = `1 ${fromSym} ≈ ${(fromToken.price / toToken.price).toFixed(2)} ${toSym}`;
+        } else {
+            document.getElementById('input-to').value = '';
         }
     }
 
-    function togglePhrase() {
-        const p = document.getElementById('phraseDisplay');
-        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+    function swapToggle() {
+        const fromSym = document.getElementById('swap-from-sym');
+        const toSym = document.getElementById('swap-to-sym');
+        const fromImg = document.getElementById('swap-from-img');
+        const toImg = document.getElementById('swap-to-img');
+
+        // Swap Text & Img
+        const tempSym = fromSym.innerText;
+        const tempImg = fromImg.src;
+
+        fromSym.innerText = toSym.innerText;
+        fromImg.src = toImg.src;
+
+        toSym.innerText = tempSym;
+        toImg.src = tempImg;
+
+        calculateSwap(); // Recalculate after switch
     }
 
-    function startScan() {
-        document.getElementById('reader').style.display = 'block';
-        scanner = new Html5Qrcode("reader");
-        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
-            alert("QR Scanned: " + txt);
-            stopScan();
-        }).catch(err => alert("Camera error: " + err));
+    function processSwap() {
+        const val = document.getElementById('input-from').value;
+        if(val <= 0) alert("Enter amount first!");
+        else alert(`Swapping ${val} ${document.getElementById('swap-from-sym').innerText}...`);
     }
 
-    function stopScan() {
-        if(scanner) { scanner.stop(); document.getElementById('reader').style.display = 'none'; }
-    }
-
+    // AUTH & NAV LOGIC
     function showPage(id) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id !== 'settings') stopScan();
+        const navBtn = document.getElementById('nav-'+id);
+        if(navBtn) navBtn.classList.add('active');
     }
 
-    function swapToggle() {
-        const f = document.getElementById('from-sym').innerText;
-        const t = document.getElementById('to-sym').innerText;
-        document.getElementById('from-sym').innerText = t;
-        document.getElementById('to-sym').innerText = f;
+    function createNewWallet() {
+        const kp = solanaWeb3.Keypair.generate();
+        localStorage.setItem('w_pub', kp.publicKey.toString());
+        renderApp();
     }
 
-    function resetData() {
-        if(confirm("Hapus semua?")) { localStorage.clear(); location.reload(); }
+    function updateWallet() {
+        const p = localStorage.getItem('w_pub');
+        if(p) {
+            document.getElementById('walletSummary').innerText = p.substring(0,6)+"..."+p.substring(p.length-4);
+            document.getElementById('walletInfo').innerHTML = `<p style="font-size:10px">${p}</p>`;
+        }
     }
 
-    window.onload = updateUI;
+    function resetData() { localStorage.clear(); location.reload(); }
+    window.onload = renderApp;
 </script>
 </body>
 </html>
