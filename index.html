@@ -3,82 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Micin Hunter Wallet</title>
+    <title>Solana Micin Hunter Pro</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --card: #1e2329; --primary: #02c076; --text: #eaeaea; --accent: #474d57; --input: #2b3139; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { background: var(--card); padding: 25px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        .container { background: var(--card); padding: 25px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; position: relative; }
         
-        .tabs { display: flex; justify-content: space-around; margin-bottom: 20px; border-bottom: 1px solid #333; }
-        .tab-btn { background: none; border: none; color: #848e9c; cursor: pointer; font-weight: bold; padding: 10px; }
-        .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        /* Navigasi Tab di Bawah (Mirip App Asli) */
+        .tabs { display: flex; justify-content: space-around; margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
+        .tab-btn { background: none; border: none; color: #848e9c; cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .tab-btn.active { color: var(--primary); }
+        .tab-icon { font-size: 20px; }
         
-        .content { display: none; }
+        .content { display: none; animation: fadeIn 0.3s; }
         .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Style Halaman Depan (Sesuai Gambar Kamu) */
+        .logo { width: 45px; margin-bottom: 10px; }
         .balance-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
         .fiat-val { color: var(--primary); font-size: 16px; margin-bottom: 20px; }
-        
-        .input-group { text-align: left; margin-bottom: 15px; }
-        .input-group label { font-size: 12px; color: #848e9c; margin-bottom: 5px; display: block; }
-        .custom-input { background: var(--input); border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; }
+        #qrcode { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
+        .address-box { background: #0b0e11; padding: 12px; border-radius: 10px; font-size: 10px; word-break: break-all; color: #b7bdc6; margin-bottom: 15px; border: 1px solid var(--accent); cursor: pointer; }
 
-        .token-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--input); border-radius: 12px; margin-bottom: 10px; }
-        .btn-action { background: var(--primary); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        /* Style List Token & Import */
+        .token-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #161a1e; border-radius: 12px; margin-bottom: 10px; text-align: left; }
+        .input-ca { background: var(--input); border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; outline: none; font-size: 12px; }
+
+        /* Style Swap */
+        .swap-card { background: var(--input); padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 10px; }
+        .swap-label { font-size: 11px; color: #848e9c; margin-bottom: 5px; }
+        .swap-input { background: none; border: none; color: white; font-size: 20px; width: 100%; outline: none; }
+
+        button.main-btn { background: var(--primary); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; }
+        button.sec-btn { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('wallet')">Wallet</button>
-        <button class="tab-btn" onclick="openTab('swap')">Swap Micin</button>
-    </div>
-
+    
     <div id="wallet" class="content active">
-        <div style="color: #848e9c; font-size: 13px;">Total Balance</div>
+        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="logo">
+        <div style="color: #848e9c; font-size: 13px;">Saldo Dompet</div>
         <div class="balance-amount">0.00 SOL</div>
         <div class="fiat-val">≈ Rp 1.454.257</div>
-        
+        <div id="qrcode"></div>
+        <div style="color: #848e9c; font-size: 11px; text-align: left; margin-bottom: 5px;">Alamat (Tap untuk Salin):</div>
+        <div class="address-box" id="addressDisplay" onclick="copyAddr()">CZnC1a...8CVy</div>
+        <button class="main-btn" onclick="buatWalletBaru()">Buat Wallet Baru</button>
+    </div>
+
+    <div id="tokens" class="content">
+        <h3 style="text-align: left;">Daftar Asset</h3>
         <div id="tokenList">
             <div class="token-item">
                 <span><b>SOL</b> (Solana)</span>
                 <span>0.00</span>
             </div>
         </div>
-
-        <hr style="border: 0.5px solid #333; margin: 20px 0;">
-        
-        <div class="input-group">
-            <label>Import Custom Token (Mint Address)</label>
-            <input type="text" id="caToken" class="custom-input" placeholder="Masukkan Alamat Kontrak...">
-            <button class="btn-action" style="background: #474d57; color: white;" onclick="importToken()">+ Add Custom Token</button>
+        <div style="margin-top: 25px; border-top: 1px solid #333; padding-top: 15px;">
+            <div style="text-align: left; font-size: 12px; color: #848e9c; margin-bottom: 8px;">Tambah Token Micin (CA)</div>
+            <input type="text" id="caInput" class="input-ca" placeholder="Paste Mint Address (CA) di sini...">
+            <button class="sec-btn" onclick="importToken()">+ Impor Token</button>
         </div>
     </div>
 
     <div id="swap" class="content">
-        <h3>Swap Micin</h3>
-        <div class="input-group">
-            <label>From (SOL)</label>
-            <input type="number" class="custom-input" placeholder="0.00">
+        <h3 style="text-align: left;">Swap / Tukar</h3>
+        <div class="swap-card">
+            <div class="swap-label">Jual (SOL)</div>
+            <input type="number" class="swap-input" placeholder="0.00">
         </div>
-        <div style="margin: 10px 0;">⬇️</div>
-        <div class="input-group">
-            <label>To (Paste Smart Contract Koin Micin)</label>
-            <input type="text" class="custom-input" placeholder="Contoh: 4k3Dy9... (CA Koin)">
+        <div style="margin: 10px 0; font-size: 18px;">⬇️</div>
+        <div class="swap-card">
+            <div class="swap-label">Beli (Input CA Token Micin)</div>
+            <input type="text" class="input-ca" style="margin-bottom: 5px;" placeholder="Paste CA Koin Micin...">
+            <input type="number" class="swap-input" placeholder="0.00" readonly>
         </div>
-        <div class="input-group">
-            <label>Estimate Received</label>
-            <input type="text" class="custom-input" placeholder="0.00" readonly>
-        </div>
-        <button class="btn-action">Swap Now</button>
+        <button class="main-btn" style="margin-top: 10px;">Tukar Sekarang</button>
     </div>
 
-    <div style="font-size: 10px; color: #848e9c; margin-top: 20px;">
-        Alamat Wallet: <span id="addr">Loading...</span>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('wallet')"><span class="tab-icon">🏠</span>Home</button>
+        <button class="tab-btn" onclick="openTab('tokens')"><span class="tab-icon">🪙</span>Tokens</button>
+        <button class="tab-btn" onclick="openTab('swap')"><span class="tab-icon">🔄</span>Swap</button>
     </div>
+
 </div>
 
 <script>
@@ -89,21 +102,16 @@
         event.currentTarget.classList.add('active');
     }
 
-    // Fungsi simulasi import koin micin
     function importToken() {
-        const ca = document.getElementById('caToken').value;
-        if(ca.length < 32) return alert("Alamat Kontrak Tidak Valid!");
-        
+        const ca = document.getElementById('caInput').value;
+        if(ca.length < 30) return alert("CA tidak valid!");
         const list = document.getElementById('tokenList');
-        const newToken = document.createElement('div');
-        newToken.className = 'token-item';
-        // Simulasi nama koin (di aplikasi asli, ini akan fetch metadata dari blockchain)
-        const shortCA = ca.substring(0,4) + "..." + ca.substring(ca.length-4);
-        newToken.innerHTML = `<span><b>MICIN</b> (${shortCA})</span> <span>0.00</span>`;
-        list.appendChild(newToken);
-        
-        document.getElementById('caToken').value = "";
-        alert("Token Micin Berhasil Ditambahkan!");
+        const div = document.createElement('div');
+        div.className = 'token-item';
+        div.innerHTML = `<span><b>TOKEN</b> (${ca.substring(0,4)}...${ca.substring(ca.length-4)})</span><span>0.00</span>`;
+        list.appendChild(div);
+        document.getElementById('caInput').value = "";
+        alert("Token ditambahkan ke list!");
     }
 
     function muatWallet() {
@@ -111,8 +119,22 @@
         if (saved) {
             const arr = new Uint8Array(JSON.parse(saved));
             const kp = solanaWeb3.Keypair.fromSecretKey(arr);
-            document.getElementById('addr').innerText = kp.publicKey.toBase58();
+            document.getElementById('addressDisplay').innerText = kp.publicKey.toBase58();
+            new QRCode(document.getElementById("qrcode"), { text: kp.publicKey.toBase58(), width: 120, height: 120 });
         }
+    }
+
+    function buatWalletBaru() {
+        if(confirm("Buat wallet baru?")) {
+            const kp = solanaWeb3.Keypair.generate();
+            localStorage.setItem("solana_pro_key", JSON.stringify(Array.from(kp.secretKey)));
+            location.reload();
+        }
+    }
+
+    function copyAddr() {
+        navigator.clipboard.writeText(document.getElementById('addressDisplay').innerText);
+        alert("Alamat disalin!");
     }
 
     window.onload = muatWallet;
