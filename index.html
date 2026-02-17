@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Super Wallet - Tablet Pro</title>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #0b0e11;
+            --card: #1e2329;
+            --primary: #02c076;
+            --text: #eaeaea;
+            --accent: #474d57;
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0;
+        }
+        .container {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .logo { width: 45px; margin-bottom: 10px; }
+        .balance-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
+        .fiat-val { color: var(--primary); font-size: 16px; margin-bottom: 20px; }
+        
+        /* Gaya QR Code */
+        #qrcode { 
+            background: white; 
+            padding: 10px; 
+            border-radius: 12px; 
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .address-box {
+            background: #0b0e11;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            word-break: break-all;
+            color: #b7bdc6;
+            margin-bottom: 20px;
+            border: 1px solid var(--accent);
+            cursor: pointer;
+        }
+        button {
+            background: var(--primary);
+            color: #000; border: none; padding: 15px;
+            border-radius: 12px; font-weight: bold;
+            width: 100%; font-size: 16px; cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .btn-reset { background: #333; color: #ff4d4d; font-size: 12px; padding: 8px; }
+        .footer { font-size: 10px; color: #848e9c; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="logo">
+    <div style="color: #848e9c; font-size: 13px;">Saldo Dompet</div>
+    <div class="balance-amount">0.00 SOL</div>
+    <div id="priceDisplay" class="fiat-val">Memuat harga...</div>
+    
+    <div id="qrcode"></div>
+
+    <div style="color: #848e9c; font-size: 12px; text-align: left; margin-bottom: 5px;">Alamat (Tap untuk Salin):</div>
+    <div class="address-box" id="addressDisplay" onclick="copyAddr()">Klik tombol di bawah</div>
+    
+    <button onclick="buatWalletBaru()">Buat Wallet Baru</button>
+    <button class="btn-reset" onclick="hapusWallet()">Hapus & Reset Data</button>
+    
+    <div class="footer">
+        Solana Devnet Mode <br>
+        Kunci tersimpan aman di LocalStorage tablet Anda.
+    </div>
+</div>
+
+<script>
+    // 1. Simpan & Ambil Data dari Memory Tablet
+    function simpanWallet(kp) {
+        const secret = JSON.stringify(Array.from(kp.secretKey));
+        localStorage.setItem("solana_pro_key", secret);
+    }
+
+    function muatWallet() {
+        const saved = localStorage.getItem("solana_pro_key");
+        if (saved) {
+            const arr = new Uint8Array(JSON.parse(saved));
+            return solanaWeb3.Keypair.fromSecretKey(arr);
+        }
+        return null;
+    }
+
+    // 2. Update QR Code
+    function updateQR(addr) {
+        const container = document.getElementById("qrcode");
+        container.innerHTML = ""; 
+        new QRCode(container, {
+            text: addr,
+            width: 120,
+            height: 120,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+        });
+    }
+
+    // 3. Ambil Harga SOL Real-time
+    async function getHarga() {
+        try {
+            const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=idr');
+            const d = await r.json();
+            document.getElementById('priceDisplay').innerText = `≈ Rp ${d.solana.idr.toLocaleString('id-ID')}`;
+        } catch (e) { document.getElementById('priceDisplay').innerText = "Harga Offline"; }
+    }
+
+    // 4. Fungsi Tombol
+    function buatWalletBaru() {
+        if(confirm("Buat wallet baru? Data lama akan tertimpa.")) {
+            const kp = solanaWeb3.Keypair.generate();
+            simpanWallet(kp);
+            tampilkan(kp);
+        }
+    }
+
+    function tampilkan(kp) {
+        const addr = kp.publicKey.toBase58();
+        document.getElementById('addressDisplay').innerText = addr;
+        updateQR(addr);
+    }
+
+    function hapusWallet() {
+        if(confirm("Hapus wallet permanen?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    function copyAddr() {
+        const text = document.getElementById('addressDisplay').innerText;
+        if(text.includes("Klik")) return;
+        navigator.clipboard.writeText(text);
+        alert("Alamat disalin ke clipboard!");
+    }
+
+    // Jalankan saat startup
+    window.onload = () => {
+        getHarga();
+        const lama = muatWallet();
+        if(lama) tampilkan(lama);
+    };
+</script>
+
+</body>
+</html>
