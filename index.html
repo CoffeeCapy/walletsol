@@ -3,38 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Hunter - Visual Edition</title>
+    <title>Solana Hunter - Pro Trader Edition</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --card: #1e2329; --primary: #02c076; --text: #eaeaea; --accent: #474d57; --input: #2b3139; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { background: var(--card); padding: 25px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        .container { background: var(--card); padding: 25px; border-radius: 24px; width: 100%; max-width: 420px; text-align: center; border: 1px solid #333; overflow: hidden; }
         
+        /* Navigasi */
         .tabs { display: flex; justify-content: space-around; margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
         .tab-btn { background: none; border: none; color: #848e9c; cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .tab-btn.active { color: var(--primary); }
         
-        .content { display: none; animation: fadeIn 0.3s; }
+        .content { display: none; animation: slideUp 0.3s ease-out; }
         .content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+        /* Home */
         .logo-main { width: 45px; margin-bottom: 10px; }
         .balance-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
         .fiat-val { color: var(--primary); font-size: 16px; margin-bottom: 20px; }
-        #qrcode { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
+        #qrcode { background: white; padding: 8px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
         .address-box { background: #0b0e11; padding: 12px; border-radius: 10px; font-size: 10px; word-break: break-all; color: #b7bdc6; margin-bottom: 15px; border: 1px solid var(--accent); cursor: pointer; }
 
-        /* Style List Token dengan Logo */
-        .token-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #161a1e; border-radius: 12px; margin-bottom: 8px; text-align: left; }
+        /* Tokens List */
+        .token-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #161a1e; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+        .token-item:hover { background: #2b3139; transform: scale(1.02); }
         .token-left { display: flex; align-items: center; gap: 12px; }
         .token-icon { width: 32px; height: 32px; border-radius: 50%; }
-        .token-name { font-weight: bold; font-size: 14px; }
-        .token-price { font-size: 11px; color: #848e9c; }
-        
-        .input-ca { background: var(--input); border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; outline: none; }
-        button.main-btn { background: var(--primary); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; }
-        button.sec-btn { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; }
+
+        /* Swap & Chart */
+        #chart-container { width: 100%; height: 200px; margin-bottom: 15px; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
+        .swap-card { background: var(--input); padding: 12px; border-radius: 12px; text-align: left; margin-bottom: 10px; }
+        button.main-btn { background: var(--primary); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -43,127 +45,124 @@
     
     <div id="wallet" class="content active">
         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="logo-main">
-        <div style="color: #848e9c; font-size: 13px;">Saldo Dompet</div>
+        <div style="color: #848e9c; font-size: 13px;">Total Balance</div>
         <div class="balance-amount">0.00 SOL</div>
-        <div id="solPriceHome" class="fiat-val">Memuat...</div>
+        <div id="solPriceHome" class="fiat-val">≈ Rp 0</div>
         <div id="qrcode"></div>
         <div class="address-box" id="addressDisplay" onclick="copyAddr()">Loading...</div>
-        <button class="main-btn" onclick="buatWalletBaru()">Buat Wallet Baru</button>
+        <button class="main-btn" onclick="buatWalletBaru()">Generate New Wallet</button>
     </div>
 
     <div id="tokens" class="content">
         <h3 style="text-align: left;">Market Assets</h3>
         <div id="tokenList">
-            <div class="token-item">
+            <div class="token-item" onclick="goToSwap('SOLANA')">
                 <div class="token-left">
                     <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="token-icon">
-                    <div><span class="token-name">SOL</span><br><span id="price-sol" class="token-price">Rp 0</span></div>
+                    <div><b>SOL</b><br><small id="price-sol" style="color:#848e9c">Rp 0</small></div>
                 </div>
-                <div><b>0.00</b></div>
+                <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Trade ⮕</small></div>
             </div>
-            <div class="token-item">
+            <div class="token-item" onclick="goToSwap('BITCOIN')">
                 <div class="token-left">
                     <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="token-icon">
-                    <div><span class="token-name">BTC</span><br><span id="price-btc" class="token-price">Rp 0</span></div>
+                    <div><b>BTC</b><br><small id="price-btc" style="color:#848e9c">Rp 0</small></div>
                 </div>
-                <div><b>0.00</b></div>
+                <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Trade ⮕</small></div>
             </div>
-            <div class="token-item">
+            <div class="token-item" onclick="goToSwap('ETHEREUM')">
                 <div class="token-left">
                     <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="token-icon">
-                    <div><span class="token-name">ETH</span><br><span id="price-eth" class="token-price">Rp 0</span></div>
+                    <div><b>ETH</b><br><small id="price-eth" style="color:#848e9c">Rp 0</small></div>
                 </div>
-                <div><b>0.00</b></div>
+                <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Trade ⮕</small></div>
             </div>
-            <div class="token-item">
-                <div class="token-left">
-                    <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" class="token-icon">
-                    <div><span class="token-name">USDC</span><br><span id="price-usdc" class="token-price">Rp 0</span></div>
-                </div>
-                <div><b>0.00</b></div>
-            </div>
-        </div>
-        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
-            <input type="text" id="caInput" class="input-ca" placeholder="Masukkan CA Koin Micin...">
-            <button class="sec-btn" onclick="importToken()">+ Impor Token Manual</button>
         </div>
     </div>
 
     <div id="swap" class="content">
-        <h3 style="text-align: left;">Swap</h3>
-        <div style="background: var(--input); padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 10px;">
-            <div style="font-size: 11px; color: #848e9c;">Jual (SOL)</div>
-            <input type="number" style="background:none; border:none; color:white; font-size:20px; width:100%; outline:none;" placeholder="0.00">
+        <h3 id="swap-title" style="text-align: left; margin-bottom: 10px;">Swap SOL</h3>
+        
+        <div id="chart-container">
+            <div id="tradingview_widget"></div>
         </div>
-        <div style="margin: 10px 0;">⬇️</div>
-        <div style="background: var(--input); padding: 15px; border-radius: 15px; text-align: left;">
-            <div style="font-size: 11px; color: #848e9c;">Beli (Input CA)</div>
-            <input type="text" class="input-ca" placeholder="Paste CA Koin Micin...">
+
+        <div class="swap-card">
+            <small style="color:#848e9c">Sell SOL</small>
+            <input type="number" style="background:none; border:none; color:white; font-size:18px; width:100%; outline:none;" placeholder="0.00">
         </div>
-        <button class="main-btn" style="margin-top: 15px;">Tukar Sekarang</button>
+        <div style="margin: 5px 0;">⬇️</div>
+        <div class="swap-card">
+            <small style="color:#848e9c">Buy (Custom CA)</small>
+            <input type="text" style="background:none; border:none; color:white; font-size:14px; width:100%; outline:none;" placeholder="Paste Smart Contract...">
+        </div>
+        <button class="main-btn">Execute Swap</button>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('wallet')">🏠<br>Home</button>
-        <button class="tab-btn" onclick="openTab('tokens')">🪙<br>Tokens</button>
-        <button class="tab-btn" onclick="openTab('swap')">🔄<br>Swap</button>
+        <button id="t-wallet" class="tab-btn active" onclick="openTab('wallet')">🏠<br>Home</button>
+        <button id="t-tokens" class="tab-btn" onclick="openTab('tokens')">🪙<br>Tokens</button>
+        <button id="t-swap" class="tab-btn" onclick="openTab('swap')">🔄<br>Swap</button>
     </div>
 </div>
 
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
 <script>
-    async function updateHarga() {
-        try {
-            const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,usd-coin&vs_currencies=idr');
-            const data = await res.json();
-            const sol = data.solana.idr;
-            const btc = data.bitcoin.idr;
-            const eth = data.ethereum.idr;
-            const usdc = data['usd-coin'].idr;
-
-            document.getElementById('solPriceHome').innerText = `≈ Rp ${sol.toLocaleString('id-ID')}`;
-            document.getElementById('price-sol').innerText = `Rp ${sol.toLocaleString('id-ID')}`;
-            document.getElementById('price-btc').innerText = `Rp ${btc.toLocaleString('id-ID')}`;
-            document.getElementById('price-eth').innerText = `Rp ${eth.toLocaleString('id-ID')}`;
-            document.getElementById('price-usdc').innerText = `Rp ${usdc.toLocaleString('id-ID')}`;
-        } catch (e) { console.log("Gagal ambil harga"); }
-    }
-
+    // FUNGSI PINDAH TAB
     function openTab(name) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(name).classList.add('active');
-        event.currentTarget.classList.add('active');
+        document.getElementById('t-'+name).classList.add('active');
     }
 
-    function importToken() {
-        const ca = document.getElementById('caInput').value;
-        if(ca.length < 30) return alert("CA tidak valid!");
-        const list = document.getElementById('tokenList');
-        const div = document.createElement('div');
-        div.className = 'token-item';
-        div.innerHTML = `
-            <div class="token-left">
-                <div style="width:32px; height:32px; background:#444; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px;">?</div>
-                <div><span class="token-name">MICIN</span><br><span class="token-price">${ca.substring(0,6)}...</span></div>
-            </div>
-            <div><b>0.00</b></div>`;
-        list.appendChild(div);
-        document.getElementById('caInput').value = "";
+    // FUNGSI KLIK KOIN -> SWAP + CHART
+    function goToSwap(coin) {
+        openTab('swap');
+        document.getElementById('swap-title').innerText = "Trade " + coin;
+        
+        // Update Chart sesuai koin yang diklik
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "BINANCE:" + coin + "USDT",
+            "interval": "H",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": true,
+            "save_image": false,
+            "container_id": "tradingview_widget"
+        });
+    }
+
+    // UPDATE HARGA REALTIME
+    async function updateHarga() {
+        try {
+            const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum&vs_currencies=idr');
+            const data = await res.json();
+            document.getElementById('solPriceHome').innerText = `≈ Rp ${data.solana.idr.toLocaleString('id-ID')}`;
+            document.getElementById('price-sol').innerText = `Rp ${data.solana.idr.toLocaleString('id-ID')}`;
+            document.getElementById('price-btc').innerText = `Rp ${data.bitcoin.idr.toLocaleString('id-ID')}`;
+            document.getElementById('price-eth').innerText = `Rp ${data.ethereum.idr.toLocaleString('id-ID')}`;
+        } catch (e) {}
     }
 
     function muatWallet() {
         const saved = localStorage.getItem("solana_pro_key");
         if (saved) {
-            const arr = new Uint8Array(JSON.parse(saved));
-            const kp = solanaWeb3.Keypair.fromSecretKey(arr);
+            const kp = solanaWeb3.Keypair.fromSecretKey(new Uint8Array(JSON.parse(saved)));
             const addr = kp.publicKey.toBase58();
             document.getElementById('addressDisplay').innerText = addr;
-            new QRCode(document.getElementById("qrcode"), { text: addr, width: 120, height: 120 });
+            new QRCode(document.getElementById("qrcode"), { text: addr, width: 100, height: 100 });
         }
     }
 
     function buatWalletBaru() {
-        if(confirm("Buat baru?")) {
+        if(confirm("Generate new wallet?")) {
             const kp = solanaWeb3.Keypair.generate();
             localStorage.setItem("solana_pro_key", JSON.stringify(Array.from(kp.secretKey)));
             location.reload();
@@ -172,10 +171,14 @@
 
     function copyAddr() {
         navigator.clipboard.writeText(document.getElementById('addressDisplay').innerText);
-        alert("Alamat disalin!");
+        alert("Copied!");
     }
 
-    window.onload = () => { muatWallet(); updateHarga(); setInterval(updateHarga, 30000); };
+    window.onload = () => {
+        muatWallet(); 
+        updateHarga();
+        goToSwap('SOLANA'); // Default chart
+    };
 </script>
 </body>
 </html>
