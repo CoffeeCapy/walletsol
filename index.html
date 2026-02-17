@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Hunter - Clean Edition</title>
+    <title>Solana Hunter - Minimalist Edition</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -27,13 +27,14 @@
         #qrcode { background: white; padding: 8px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
         .address-box { background: #0b0e11; padding: 12px; border-radius: 10px; font-size: 10px; word-break: break-all; color: #b7bdc6; margin-bottom: 15px; border: 1px solid var(--accent); cursor: pointer; }
 
-        /* Tokens List */
-        .token-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #161a1e; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
-        .token-item:active { transform: scale(0.98); background: #2b3139; }
+        /* Tokens List (Tanpa tulisan Swap) */
+        .token-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #161a1e; border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .token-item:active { transform: scale(0.97); background: #2b3139; border-color: var(--primary); }
         .token-left { display: flex; align-items: center; gap: 12px; }
-        .token-icon { width: 32px; height: 32px; border-radius: 50%; }
+        .token-icon { width: 35px; height: 35px; border-radius: 50%; }
+        .token-name { font-weight: bold; font-size: 15px; }
 
-        /* Swap */
+        /* Swap Halaman */
         .swap-card { background: var(--input); padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 10px; border: 1px solid #333; }
         .input-ca { background: var(--input); border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; outline: none; font-size: 12px; }
         button.main-btn { background: var(--primary); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; }
@@ -50,60 +51,54 @@
         <div class="balance-amount">0.00 SOL</div>
         <div id="solPriceHome" class="fiat-val">≈ Rp 0</div>
         <div id="qrcode"></div>
-        <div class="address-box" id="addressDisplay" onclick="copyAddr()">Loading Address...</div>
+        <div class="address-box" id="addressDisplay" onclick="copyAddr()">Loading...</div>
         <button class="main-btn" onclick="buatWalletBaru()">Generate New Wallet</button>
     </div>
 
     <div id="tokens" class="content">
-        <h3 style="text-align: left;">Market Assets</h3>
+        <h3 style="text-align: left; margin-left: 5px;">My Assets</h3>
         <div id="tokenList">
             <div class="token-item" onclick="goToSwap('SOL')">
                 <div class="token-left">
                     <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="token-icon">
-                    <div><b>SOL</b><br><small id="price-sol" style="color:#848e9c">Rp 0</small></div>
+                    <div><span class="token-name">SOL</span><br><small id="price-sol" style="color:#848e9c">Rp 0</small></div>
                 </div>
-                <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Swap ⮕</small></div>
+                <div style="text-align:right"><b>0.00</b></div>
             </div>
             <div class="token-item" onclick="goToSwap('BTC')">
                 <div class="token-left">
                     <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="token-icon">
-                    <div><b>BTC</b><br><small id="price-btc" style="color:#848e9c">Rp 0</small></div>
+                    <div><span class="token-name">BTC</span><br><small id="price-btc" style="color:#848e9c">Rp 0</small></div>
                 </div>
-                <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Swap ⮕</small></div>
+                <div style="text-align:right"><b>0.00</b></div>
             </div>
             <div class="token-item" onclick="goToSwap('ETH')">
                 <div class="token-left">
                     <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="token-icon">
-                    <div><b>ETH</b><br><small id="price-eth" style="color:#848e9c">Rp 0</small></div>
+                    <div><span class="token-name">ETH</span><br><small id="price-eth" style="color:#848e9c">Rp 0</small></div>
                 </div>
-                <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Swap ⮕</small></div>
+                <div style="text-align:right"><b>0.00</b></div>
             </div>
         </div>
 
-        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
-            <div style="text-align: left; font-size: 12px; color: #848e9c; margin-bottom: 8px;">Add Custom Token (CA)</div>
-            <input type="text" id="caInput" class="input-ca" placeholder="Paste Smart Contract (CA)...">
-            <button class="sec-btn" onclick="importToken()">+ Import to List</button>
+        <div style="margin-top: 25px; border-top: 1px solid #333; padding-top: 15px;">
+            <input type="text" id="caInput" class="input-ca" placeholder="Input CA for custom token...">
+            <button class="sec-btn" onclick="importToken()">+ Add to List</button>
         </div>
     </div>
 
     <div id="swap" class="content">
-        <h3 style="text-align: left; margin-bottom: 20px;">Swap Exchange</h3>
-        
+        <h3 style="text-align: left; margin-bottom: 20px;">Swap Crypto</h3>
         <div class="swap-card">
             <small id="label-jual" style="color:#848e9c; font-weight:bold;">Sell SOL</small>
             <input type="number" style="background:none; border:none; color:white; font-size:24px; width:100%; outline:none; margin-top:8px;" placeholder="0.00">
         </div>
-
-        <div style="font-size: 24px; margin: 10px 0;">⬇️</div>
-
+        <div style="font-size: 24px; margin: 5px 0;">⬇️</div>
         <div class="swap-card">
-            <small style="color:#848e9c; font-weight:bold;">Buy (Target CA)</small>
-            <input type="text" class="input-ca" style="margin-top:8px; margin-bottom:0; background:#161a1e;" placeholder="Paste CA Token Micin...">
-            <div style="margin-top:10px; font-size:12px; color:#02c076;">Est. Received: 0.00</div>
+            <small style="color:#848e9c; font-weight:bold;">Buy (Contract Address)</small>
+            <input type="text" class="input-ca" style="margin-top:8px; margin-bottom:0; background:#161a1e;" placeholder="Paste CA here...">
         </div>
-
-        <button class="main-btn" style="margin-top: 20px;">Execute Transaction</button>
+        <button class="main-btn" style="margin-top: 20px;">Swap Now</button>
     </div>
 
     <div class="tabs">
@@ -121,7 +116,6 @@
         document.getElementById('t-'+name).classList.add('active');
     }
 
-    // Fungsi Klik Koin -> Ubah Label Swap
     function goToSwap(coinSymbol) {
         document.getElementById('label-jual').innerText = "Sell " + coinSymbol;
         openTab('swap');
@@ -129,20 +123,19 @@
 
     function importToken() {
         const ca = document.getElementById('caInput').value;
-        if(ca.length < 30) return alert("CA tidak valid!");
+        if(ca.length < 30) return alert("Invalid CA!");
         const list = document.getElementById('tokenList');
         const div = document.createElement('div');
         div.className = 'token-item';
         div.onclick = function() { goToSwap('TOKEN'); };
         div.innerHTML = `
             <div class="token-left">
-                <div style="width:32px; height:32px; background:linear-gradient(45deg, #444, #222); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold;">CA</div>
-                <div><b>TOKEN</b><br><small style="color:#848e9c">${ca.substring(0,6)}...</small></div>
+                <div style="width:35px; height:35px; background:linear-gradient(45deg, #444, #111); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px;">CA</div>
+                <div><span class="token-name">IMPORTED</span><br><small style="color:#848e9c">${ca.substring(0,6)}...</small></div>
             </div>
-            <div style="text-align:right"><b>0.00</b><br><small style="color:#02c076">Swap ⮕</small></div>`;
+            <div style="text-align:right"><b>0.00</b></div>`;
         list.appendChild(div);
         document.getElementById('caInput').value = "";
-        alert("Token ditambahkan!");
     }
 
     async function updateHarga() {
@@ -167,7 +160,7 @@
     }
 
     function buatWalletBaru() {
-        if(confirm("Generate new wallet?")) {
+        if(confirm("New wallet?")) {
             const kp = solanaWeb3.Keypair.generate();
             localStorage.setItem("solana_pro_key", JSON.stringify(Array.from(kp.secretKey)));
             location.reload();
@@ -176,14 +169,10 @@
 
     function copyAddr() {
         navigator.clipboard.writeText(document.getElementById('addressDisplay').innerText);
-        alert("Copied to clipboard!");
+        alert("Address copied!");
     }
 
-    window.onload = () => {
-        muatWallet(); 
-        updateHarga();
-        setInterval(updateHarga, 30000);
-    };
+    window.onload = () => { muatWallet(); updateHarga(); setInterval(updateHarga, 30000); };
 </script>
 </body>
 </html>
