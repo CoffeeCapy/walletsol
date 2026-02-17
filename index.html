@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Hunter - Smart Sync</title>
+    <title>Solana Hunter - Ultimate Pro</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
         :root { 
@@ -32,15 +32,26 @@
         .action-icon { background: var(--card); width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.05); }
         .action-icon.highlight { background: var(--primary); color: #000; }
 
-        .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(128,128,128,0.05); }
+        .token-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(128,128,128,0.05); cursor: pointer; }
         .token-meta { display: flex; align-items: center; gap: 12px; }
         .manage-crypto-link { display: block; text-align: center; color: var(--primary); font-weight: bold; margin: 30px 0; cursor: pointer; font-size: 14px; }
 
-        /* --- MANAGE --- */
+        /* --- SWAP (GAMBAR 1) --- */
+        .swap-card { background: var(--input); border-radius: 20px; padding: 18px; margin-bottom: 5px; position: relative; }
+        .swap-header { display: flex; justify-content: space-between; font-size: 13px; color: #848e9c; margin-bottom: 12px; }
+        .token-pill { display: flex; align-items: center; background: var(--card); padding: 6px 12px; border-radius: 50px; cursor: pointer; border: 1px solid rgba(128,128,128,0.1); }
+        .swap-input { background: none; border: none; color: var(--text); font-size: 26px; font-weight: bold; text-align: right; width: 50%; outline: none; }
+        .chip { background: var(--accent); color: var(--primary); border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .switch-circle { background: var(--card); border: 4px solid var(--bg); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: -15px auto; position: relative; z-index: 5; cursor: pointer; }
+
+        /* --- SETTINGS (GAMBAR 2) --- */
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--input); border-radius: 16px; margin-bottom: 10px; cursor: pointer; }
+
+        /* --- MANAGE (GAMBAR 3) --- */
         .search-box { width: 100%; background: var(--input); border: none; padding: 12px 15px; border-radius: 10px; color: white; margin: 15px 0; box-sizing: border-box; outline: none; }
         .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
 
-        /* Switch Toggle */
+        /* Switch Toggle Style */
         .switch { position: relative; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #474d57; transition: .4s; border-radius: 34px; }
@@ -61,7 +72,7 @@
     <div id="home" class="page-content active">
         <div class="header-home">
             <span onclick="showPage('settings')" style="cursor:pointer">⚙️</span>
-            <span>🔍</span>
+            <span onclick="alert('Scan QR')">🔍</span>
         </div>
         <div class="total-balance">Rp0</div>
         <div class="balance-change">Selesaikan setup dompet Anda</div>
@@ -75,30 +86,71 @@
         </div>
 
         <div style="font-weight: bold; margin-bottom: 10px;">Assets</div>
-        <div id="homeTokenList">
-            </div>
+        <div id="homeTokenList"></div>
         <span class="manage-crypto-link" onclick="showPage('manage')">Manage crypto</span>
+    </div>
+
+    <div id="swap" class="page-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+            <h3 style="margin:0">Swap</h3>
+            <span>🕒</span>
+        </div>
+        <div class="swap-card">
+            <div class="swap-header"><span>From</span><span>👛 0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <div class="token-pill">
+                    <img id="from-img" src="https://cryptologos.cc/logos/solana-sol-logo.png" width="20">
+                    <span id="from-sym" style="margin-left:8px; font-weight:bold">SOL</span>
+                    <span style="margin-left:5px; font-size:10px">❯</span>
+                </div>
+                <input type="number" class="swap-input" placeholder="0">
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:15px">
+                <small style="color:#848e9c">Balance: 0</small>
+                <div style="display:flex; gap:6px">
+                    <button class="chip">25%</button><button class="chip">50%</button><button class="chip">Max</button>
+                </div>
+            </div>
+        </div>
+        <div class="switch-circle" onclick="swapToggle()">⇅</div>
+        <div class="swap-card" style="margin-top:0">
+            <div class="swap-header"><span>To</span><span>Balance: 0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <div class="token-pill">
+                    <img id="to-img" src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" width="20">
+                    <span id="to-sym" style="margin-left:8px; font-weight:bold">USDC</span>
+                    <span style="margin-left:5px; font-size:10px">❯</span>
+                </div>
+                <input type="number" class="swap-input" placeholder="0" readonly>
+            </div>
+        </div>
+        <button style="background:var(--primary); color:#000; width:100%; padding:18px; border-radius:50px; border:none; font-weight:bold; margin-top:30px; font-size:16px;">Continue</button>
+        <button onclick="showPage('home')" style="background:none; border:none; color:#848e9c; width:100%; margin-top:15px; cursor:pointer">Cancel</button>
+    </div>
+
+    <div id="settings" class="page-content">
+        <h3>Settings</h3>
+        <div class="setting-item" onclick="toggleDark()">
+            <div style="display:flex; align-items:center; gap:12px">🌙 <span>Dark Mode</span></div>
+            <label class="switch">
+                <input type="checkbox" id="darkToggle" checked onchange="toggleDark()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="setting-item"><span>📷 Scan QR Code</span><span>❯</span></div>
+        <div class="setting-item"><span>🔗 Wallet Connect</span><span>❯</span></div>
+        <div class="setting-item" style="color:var(--danger)" onclick="alert('Wallet Reset!')"><span>🗑️ Reset Wallet</span></div>
+        <button onclick="showPage('home')" style="background:none; border:1px solid #555; color:var(--text); padding:12px; border-radius:12px; margin-top:20px; width:100%; cursor:pointer">Back to Home</button>
     </div>
 
     <div id="manage" class="page-content">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span onclick="showPage('home')" style="cursor:pointer; font-size: 20px;">←</span>
             <b>Manage crypto</b>
-            <span style="font-size: 20px;">+</span>
+            <span onclick="alert('Add Custom Token')" style="cursor:pointer; font-size: 20px;">+</span>
         </div>
         <input type="text" class="search-box" placeholder="Search or paste Smart Contract...">
-        
-        <div id="manageListContainer">
-            </div>
-    </div>
-
-    <div id="settings" class="page-content">
-        <h3>Settings</h3>
-        <button onclick="showPage('home')">Back</button>
-    </div>
-    <div id="swap" class="page-content">
-        <h3>Swap Trade</h3>
-        <button onclick="showPage('home')">Back</button>
+        <div id="manageListContainer"></div>
     </div>
 
     <nav class="nav-bar">
@@ -111,7 +163,7 @@
 </div>
 
 <script>
-    // Database koin sementara
+    // Database Token
     const tokenData = [
         { id: 'sol', name: 'SOL', full: 'Solana', img: 'https://cryptologos.cc/logos/solana-sol-logo.png', active: true },
         { id: 'btc', name: 'BTC', full: 'Bitcoin', img: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', active: false },
@@ -121,18 +173,17 @@
         { id: 'usdt', name: 'USDT', full: 'Tether', img: 'https://cryptologos.cc/logos/tether-usdt-logo.png', active: false }
     ];
 
-    function renderApp() {
+    function renderLists() {
         const homeList = document.getElementById('homeTokenList');
         const manageList = document.getElementById('manageListContainer');
-        
         homeList.innerHTML = '';
         manageList.innerHTML = '';
 
         tokenData.forEach((token, index) => {
-            // Render untuk halaman Manage
-            const manageItem = document.createElement('div');
-            manageItem.className = 'manage-item';
-            manageItem.innerHTML = `
+            // Render Manage Page
+            const mItem = document.createElement('div');
+            mItem.className = 'manage-item';
+            mItem.innerHTML = `
                 <div class="token-meta">
                     <img src="${token.img}" width="32">
                     <div><b>${token.name}</b><br><small>${token.full}</small></div>
@@ -140,30 +191,28 @@
                 <label class="switch">
                     <input type="checkbox" ${token.active ? 'checked' : ''} onchange="toggleToken(${index})">
                     <span class="slider"></span>
-                </label>
-            `;
-            manageList.appendChild(manageItem);
+                </label>`;
+            manageList.appendChild(mItem);
 
-            // Render untuk halaman Home jika aktif
+            // Render Home Page (if active)
             if (token.active) {
-                const homeItem = document.createElement('div');
-                homeItem.className = 'token-row';
-                homeItem.onclick = () => showPage('swap');
-                homeItem.innerHTML = `
+                const hItem = document.createElement('div');
+                hItem.className = 'token-row';
+                hItem.onclick = () => showPage('swap');
+                hItem.innerHTML = `
                     <div class="token-meta">
                         <img src="${token.img}" width="35">
                         <div><b>${token.name}</b><br><small style="color:#848e9c">${token.full}</small></div>
                     </div>
-                    <div style="text-align:right"><b>0</b><br><small style="color:#848e9c">Rp0</small></div>
-                `;
-                homeList.appendChild(homeItem);
+                    <div style="text-align:right"><b>0</b><br><small style="color:#848e9c">Rp0</small></div>`;
+                homeList.appendChild(hItem);
             }
         });
     }
 
     function toggleToken(index) {
         tokenData[index].active = !tokenData[index].active;
-        renderApp(); // Gambar ulang tampilan secara otomatis
+        renderLists();
     }
 
     function showPage(id) {
@@ -174,8 +223,23 @@
         if(btn) btn.classList.add('active');
     }
 
-    // Inisialisasi awal
-    window.onload = renderApp;
+    function toggleDark() {
+        const isDark = document.getElementById('darkToggle').checked;
+        document.getElementById('appBody').className = isDark ? '' : 'light-mode';
+    }
+
+    function swapToggle() {
+        const f = document.getElementById('from-sym').innerText;
+        const t = document.getElementById('to-sym').innerText;
+        const fImg = document.getElementById('from-img').src;
+        const tImg = document.getElementById('to-img').src;
+        document.getElementById('from-sym').innerText = t;
+        document.getElementById('to-sym').innerText = f;
+        document.getElementById('from-img').src = tImg;
+        document.getElementById('to-img').src = fImg;
+    }
+
+    window.onload = renderLists;
 </script>
 </body>
 </html>
